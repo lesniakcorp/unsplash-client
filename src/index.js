@@ -36,6 +36,7 @@ export default class UnsplashClient {
       query,
       results: results.map((image) => ({
         url: image.urls.regular,
+        raw: image.urls.raw,
         thumb: image.urls.thumb,
         download_location: image.links.download_location,
         attribution: `Photo par <a href="${image.user.links.html}?utm_source=${this.appName}&utm_medium=referral">${image.user.name}</a> sur <a href="https://unsplash.com/?utm_source=${this.appName}&utm_medium=referral">Unsplash</a>`
