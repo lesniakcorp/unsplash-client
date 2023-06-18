@@ -12,7 +12,14 @@ export default class UnsplashClient {
     this.appName = config && config.appName ? config.appName : "";
   }
 
-  search(query, page = 1, callback) {
+  search({
+    query,
+    page = 1,
+    order_by = "relevant",
+    orientation = "",
+    color = "",
+    callback = () => {},
+  }) {
     axios
       .get(`${this.apiUrl}/search/photos`, {
         params: {
@@ -20,9 +27,14 @@ export default class UnsplashClient {
           query,
           page,
           per_page: this.perPage,
+          order_by,
+          orientation: orientation ? orientation : null,
+          color: color ? color : null,
         },
       })
-      .then((response) => callback(this.parseResults(response.data, page, query)))
+      .then((response) =>
+        callback(this.parseResults(response.data, page, query))
+      )
       .catch(() => callback([]));
   }
 
@@ -42,20 +54,22 @@ export default class UnsplashClient {
         raw: image.urls.raw,
         thumb: image.urls.thumb,
         download_location: image.links.download_location,
-        attribution: `Photo par <a href="${image.user.links.html}?utm_source=${this.appName}&utm_medium=referral">${image.user.name}</a> sur <a href="https://unsplash.com/?utm_source=${this.appName}&utm_medium=referral">Unsplash</a>`
+        attribution: `Photo par <a href="${image.user.links.html}?utm_source=${this.appName}&utm_medium=referral">${image.user.name}</a> sur <a href="https://unsplash.com/?utm_source=${this.appName}&utm_medium=referral">Unsplash</a>`,
       })),
     };
   }
 
   /**
    * Trigger an image download, as Unsplash API requires it when embedding
-   * @param {string} downloadLocation 
+   * @param {string} downloadLocation
    */
   download(downloadLocation) {
-    axios.get(downloadLocation, {
+    axios
+      .get(downloadLocation, {
         params: {
           client_id: this.clientId,
         },
-      }).catch((error) => console.log(error));
+      })
+      .catch((error) => console.log(error));
   }
 }
