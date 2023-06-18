@@ -35,6 +35,9 @@ export default class UnsplashClient {
       previous_page: page > 1 ? page - 1 : null,
       query,
       results: results.map((image) => ({
+        alt_description: image.alt_description,
+        description: image.description,
+        slug: image.slug,
         url: image.urls.regular,
         raw: image.urls.raw,
         thumb: image.urls.thumb,
