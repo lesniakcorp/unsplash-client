@@ -10,6 +10,7 @@ export default class UnsplashClient {
     this.clientId = config && config.clientId ? config.clientId : "";
     this.perPage = config && config.maxResults ? config.maxResults : 40;
     this.appName = config && config.appName ? config.appName : "";
+    this.downloadParameters = config && config.downloadParameters ? config.downloadParameters : "";
   }
 
   search({
@@ -50,7 +51,7 @@ export default class UnsplashClient {
         alt_description: image.alt_description,
         description: image.description,
         slug: image.slug,
-        url: image.urls.regular,
+        url: this.downloadParameters ? image.urls.raw + this.downloadParameters: image.urls.regular,
         raw: image.urls.raw,
         thumb: image.urls.thumb,
         download_location: image.links.download_location,
