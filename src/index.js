@@ -30,7 +30,7 @@ export default class UnsplashClient {
         axios.get(`${this.apiUrl}/photos/${rxResult[1]}`,
            {params:{client_id:this.clientId}})
            .then((response) =>
-            callback(this.parseResults({results:[response.data], total:1, pages:1}, page, query))
+            callback(this.parseResults({results:[response.data], total:1, total_pages:1}, page, query))
           )
           .catch(() => callback([]));
       }
