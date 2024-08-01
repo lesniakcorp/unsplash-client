@@ -21,6 +21,21 @@ export default class UnsplashClient {
     color = "",
     callback = () => {},
   }) {
+    
+    // If we've got an unsplash URL, fake search by getting photo directly
+    if (query.indexOf('https://unsplash.com/') !== -1) {
+      const rx = /^https:\/\/unsplash.com\/.*-([\w]*)$/g
+      const rxResult = rx.exec(query);
+      if (rxResult[1] !== undefined) {
+        axios.get(`${this.apiUrl}/photos/${rxResult[1]}`,
+           {params:{client_id:this.clientId}})
+           .then((response) =>
+            callback(this.parseResults({results:[response.data], total:1, pages:1}, page, query))
+          )
+          .catch(() => callback([]));
+      }
+    }
+    
     axios
       .get(`${this.apiUrl}/search/photos`, {
         params: {
