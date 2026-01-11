@@ -51,7 +51,81 @@ export default class UnsplashClient {
       .then((response) =>
         callback(this.parseResults(response.data, page, query))
       )
-      .catch(() => callback([]));
+      .catch((err) => {console.log(err);callback([])});
+  }
+
+  getUserPhotos({ username, page = 1, order_by = "latest", orientation = "", callback = () => {} }) {
+    axios
+      .get(`${this.apiUrl}/users/${username}/photos`, {
+        params: {
+          client_id: this.clientId,
+          page,
+          per_page: this.perPage,
+          order_by,
+          orientation: orientation ? orientation : null,
+        },
+      })
+      .then((response) => {
+        const total = response.headers["x-total"] ? parseInt(response.headers["x-total"]) : 0;
+        const total_pages = (total && this.perPage) ? Math.ceil(total / this.perPage) : 1;
+        callback(
+          this.parseResults(
+            { results: response.data, total, total_pages },
+            page,
+            username
+          )
+        );
+      })
+      .catch((err) => {
+        console.log(err);
+        callback([]);
+      });
+  }
+
+  searchCollections({ query, page = 1, callback = () => {} }) {
+    axios
+      .get(`${this.apiUrl}/search/collections`, {
+        params: {
+          client_id: this.clientId,
+          query,
+          page,
+          per_page: this.perPage,
+        },
+      })
+      .then((response) =>
+        callback(this.parseCollectionResults(response.data, page, query))
+      )
+      .catch((err) => {
+        console.log(err);
+        callback([]);
+      });
+  }
+
+  getCollectionPhotos({ collectionId, page = 1, orientation = "", callback = () => {} }) {
+    axios
+      .get(`${this.apiUrl}/collections/${collectionId}/photos`, {
+        params: {
+          client_id: this.clientId,
+          page,
+          per_page: this.perPage,
+          orientation: orientation ? orientation : null,
+        },
+      })
+      .then((response) => {
+        const total = response.headers["x-total"] ? parseInt(response.headers["x-total"]) : 0;
+        const total_pages = (total && this.perPage) ? Math.ceil(total / this.perPage) : 1;
+        callback(
+          this.parseResults(
+            { results: response.data, total, total_pages },
+            page,
+            collectionId
+          )
+        );
+      })
+      .catch((err) => {
+        console.log(err);
+        callback([]);
+      });
   }
 
   parseResults({ total, total_pages, results }, page, query) {
@@ -63,6 +137,8 @@ export default class UnsplashClient {
       previous_page: page > 1 ? page - 1 : null,
       query,
       results: results.map((image) => ({
+        width: image.width,
+        height: image.height,
         alt_description: image.alt_description,
         description: image.description,
         likes: image.likes,
@@ -73,6 +149,26 @@ export default class UnsplashClient {
         thumb: image.urls.thumb,
         download_location: image.links.download_location,
         attribution: `Photo par <a href="${image.user.links.html}?utm_source=${this.appName}&utm_medium=referral">${image.user.name}</a> sur <a href="https://unsplash.com/?utm_source=${this.appName}&utm_medium=referral">Unsplash</a>`,
+      })),
+    };
+  }
+
+  parseCollectionResults({ total, total_pages, results }, page, query) {
+    return {
+      total,
+      total_pages,
+      page,
+      next_page: total_pages > page ? page + 1 : null,
+      previous_page: page > 1 ? page - 1 : null,
+      query,
+      results: results.map((collection) => ({
+        id: collection.id,
+        title: collection.title,
+        total_photos: collection.total_photos,
+        user: collection.user,
+        cover_photo: collection.cover_photo,
+        thumb: collection.cover_photo ? collection.cover_photo.urls.small : null,
+        type: "collection",
       })),
     };
   }
