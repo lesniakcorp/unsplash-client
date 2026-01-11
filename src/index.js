@@ -65,6 +65,8 @@ export default class UnsplashClient {
       results: results.map((image) => ({
         alt_description: image.alt_description,
         description: image.description,
+        likes: image.likes,
+        user: image.user,
         slug: image.slug,
         url: this.downloadParameters ? image.urls.raw + this.downloadParameters: image.urls.regular,
         raw: image.urls.raw,
