@@ -148,6 +148,7 @@ export default class UnsplashClient {
         user: image.user,
         slug: image.slug,
         url: this.downloadParameters ? image.urls.raw + this.downloadParameters: image.urls.regular,
+        regular_url: image.urls.regular,
         raw: image.urls.raw,
         thumb: image.urls.thumb,
         download_location: image.links.download_location,
