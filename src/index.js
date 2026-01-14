@@ -16,6 +16,7 @@ export default class UnsplashClient {
   search({
     query,
     page = 1,
+    per_page,
     order_by = "relevant",
     orientation = "",
     color = "",
@@ -42,7 +43,7 @@ export default class UnsplashClient {
           client_id: this.clientId,
           query,
           page,
-          per_page: this.perPage,
+          per_page: per_page || this.perPage,
           order_by,
           orientation: orientation ? orientation : null,
           color: color ? color : null,
@@ -54,20 +55,21 @@ export default class UnsplashClient {
       .catch((err) => {console.log(err);callback([])});
   }
 
-  getUserPhotos({ username, page = 1, order_by = "latest", orientation = "", callback = () => {} }) {
+  getUserPhotos({ username, page = 1, per_page, order_by = "latest", orientation = "", callback = () => {} }) {
+    const actualPerPage = per_page || this.perPage;
     axios
       .get(`${this.apiUrl}/users/${username}/photos`, {
         params: {
           client_id: this.clientId,
           page,
-          per_page: this.perPage,
+          per_page: actualPerPage,
           order_by,
           orientation: orientation ? orientation : null,
         },
       })
       .then((response) => {
         const total = response.headers["x-total"] ? parseInt(response.headers["x-total"]) : 0;
-        const total_pages = (total && this.perPage) ? Math.ceil(total / this.perPage) : 1;
+        const total_pages = (total && actualPerPage) ? Math.ceil(total / actualPerPage) : 1;
         callback(
           this.parseResults(
             { results: response.data, total, total_pages },
@@ -82,14 +84,14 @@ export default class UnsplashClient {
       });
   }
 
-  searchCollections({ query, page = 1, callback = () => {} }) {
+  searchCollections({ query, page = 1, per_page, callback = () => {} }) {
     axios
       .get(`${this.apiUrl}/search/collections`, {
         params: {
           client_id: this.clientId,
           query,
           page,
-          per_page: this.perPage,
+          per_page: per_page || this.perPage,
         },
       })
       .then((response) =>
@@ -101,19 +103,20 @@ export default class UnsplashClient {
       });
   }
 
-  getCollectionPhotos({ collectionId, page = 1, orientation = "", callback = () => {} }) {
+  getCollectionPhotos({ collectionId, page = 1, per_page, orientation = "", callback = () => {} }) {
+    const actualPerPage = per_page || this.perPage;
     axios
       .get(`${this.apiUrl}/collections/${collectionId}/photos`, {
         params: {
           client_id: this.clientId,
           page,
-          per_page: this.perPage,
+          per_page: actualPerPage,
           orientation: orientation ? orientation : null,
         },
       })
       .then((response) => {
         const total = response.headers["x-total"] ? parseInt(response.headers["x-total"]) : 0;
-        const total_pages = (total && this.perPage) ? Math.ceil(total / this.perPage) : 1;
+        const total_pages = (total && actualPerPage) ? Math.ceil(total / actualPerPage) : 1;
         callback(
           this.parseResults(
             { results: response.data, total, total_pages },
